@@ -4,8 +4,11 @@
 void
 main(int argc, char *argv[])
 {
-    if(argc == 1)
+    if(argc == 1) {
         fprintf(2, "sleep: no argument...\n");
+        exit(1);
+    }
+
 
     sleep(atoi(argv[1]));
 
