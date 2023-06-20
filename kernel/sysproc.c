@@ -107,3 +107,22 @@ sys_trace(void)
   myproc()->trace_mask = trace_mask;
   return 0;
 }
+
+#include "sysinfo.h"
+extern uint64 get_freemem(void);
+extern uint64 get_nproc(void);
+uint64
+sys_sysinfo(void)
+{
+  struct sysinfo sinfo;
+  uint64 addr;
+  sinfo.freemem = get_freemem();
+  sinfo.nproc = get_nproc();
+
+  if(argaddr(0, &addr) < 0)
+    return -1;
+
+  if(copyout(myproc()->pagetable, addr, (char*)&sinfo, sizeof(sinfo)) < 0)
+    return -1;
+  return 0;
+}
