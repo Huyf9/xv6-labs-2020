@@ -440,3 +440,33 @@ copyinstr(pagetable_t pagetable, char *dst, uint64 srcva, uint64 max)
     return -1;
   }
 }
+
+int vmprint(pagetable_t pagetable) {
+  printf("page table %p\n", pagetable);
+
+  for(int i = 0; i < 512; i++) {
+    pte_t pte = pagetable[i];
+
+    if((pte & PTE_V) && (pte & (PTE_R|PTE_W|PTE_X)) == 0) {
+      printf("..%d: pte %p pa %p\n", i, pte, PTE2PA(pte));
+      
+      // 查找第二级
+      pagetable_t second_pgtbl = (pagetable_t)PTE2PA(pte);
+      for(int j = 0; j < 512; j++) {
+        pte_t second_pte = second_pgtbl[j];
+
+        if((second_pte & PTE_V) && (second_pte & (PTE_R|PTE_W|PTE_X)) == 0) {
+          printf(".. ..%d: pte %p pa %p\n", j, second_pte, PTE2PA(second_pte));
+
+          // 查找第三级
+          pagetable_t third_pgtbl = (pagetable_t)PTE2PA(second_pte);
+          for(int k = 0; k < 512; k++) {
+            pte_t third_pte = third_pgtbl[k];
+            if((third_pte & PTE_V) && (third_pte & (PTE_R|PTE_W|PTE_X))) printf(".. .. ..%d: pte %p pa %p\n", k, third_pte, PTE2PA(third_pte));
+          }
+        }
+      }
+    }
+  }
+  return 0;
+}
